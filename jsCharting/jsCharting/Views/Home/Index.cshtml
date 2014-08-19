@@ -4,23 +4,69 @@
 
 <h2>Index</h2>
 
+<div id="storyboardGraph"></div>
 <div id="graphDestination"></div>
+<div id="lineGraph"></div>
 
 @section scripts
 {
     <script type="text/javascript">
-        $.ajax("/2010-winter-olympics.csv", {
+        // The data GDP.csv is gracefully provided by WorldEconomics.com
+        $.ajax("/GDP.csv", {
             success: function (data) {
+                var csv = d3.csv.parse(data);
 
-                var svg = dimple.newSvg("#graphDestination", 800, 600);
+                var post3 = function () {
+                    var svg = dimple.newSvg("#storyboardGraph", 800, 600);
+                    var chart = new dimple.chart(svg, csv);
+
+                    csv = dimple.filterData(csv, "Year", ["2000", "2001", "2002", "2003",
+                        "2004", "2005", "2006", "2007", "2008", "2009", "2010", "2011",
+                        "2012", "2013", ]);
+                    
+                    var frame = 2000;
+                    chart.addMeasureAxis("x", "GDP");
+                    chart.addMeasureAxis("y", "Population");
+                    chart.addSeries(["Country"], dimple.plot.bubble);
+                    var story = chart.setStoryboard("Year");
+                    story.frameDuration = frame;
+                    story.addOrderRule("Date");
+                    chart.draw();
+                };
+                post3();
+            }
+        });
+
+        function onTick() {
+            
+        }
+
+        $.ajax("/2010-winter-olympics.csv", {
+            success: function(data) {
                 var csv = d3.csv.parse(data);
                 console.table(csv);
 
-                var chart = new dimple.chart(svg, csv);
-                chart.addCategoryAxis("x", "Country");
-                chart.addMeasureAxis("y", "Total");
-                chart.addSeries(null, dimple.plot.bar);
-                chart.draw();
+                // blog post #1 chart
+                var post1 = function() {
+                    var svg = dimple.newSvg("#graphDestination", 800, 600);
+                    var chart = new dimple.chart(svg, csv);
+                    chart.addCategoryAxis("x", "Country");
+                    chart.addMeasureAxis("y", "Total", "Gold");
+                    chart.addSeries("Country", dimple.plot.bar);
+                    chart.draw();
+                };
+                //post1();
+
+                var post2 = function() {
+                    // blog post #2 chart
+                    var svg = dimple.newSvg("#lineGraph", 800, 600);
+                    var chart = new dimple.chart(svg, csv);
+                    chart.addCategoryAxis("x", "Country");
+                    chart.addMeasureAxis("y", "Total");
+                    chart.addSeries(null, dimple.plot.line);
+                    chart.draw();
+                };
+                //post2();
             }
         });
     </script>
